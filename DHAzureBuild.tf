@@ -17,14 +17,14 @@ provider "azurerm" {
 }
 
 # Create a resource group
-resource "azurerm_resource_group" "XnK-rg" {
+resource "azurerm_resource_group" "DanH-rg" {
   name     = "${var.Environment}-${var.DefaultName}-Resources"
   location = var.location
 }
 
 # Create a Virtual network
-resource "azurerm_virtual_network" "XnK-Vn" {
-  resource_group_name = azurerm_resource_group.XnK-rg.name
+resource "azurerm_virtual_network" "DanH-Vn" {
+  resource_group_name = azurerm_resource_group.DanH-rg.name
   name                = "${var.Environment}-${var.DefaultName}-VirtNet"
   location            = var.location
   address_space       = var.network
@@ -34,16 +34,16 @@ resource "azurerm_virtual_network" "XnK-Vn" {
 }
 
 # Create a Subnet
-resource "azurerm_subnet" "XnK-Sn-1" {
-  resource_group_name  = azurerm_resource_group.XnK-rg.name
+resource "azurerm_subnet" "DanH-Sn-1" {
+  resource_group_name  = azurerm_resource_group.DanH-rg.name
   name                 = "${var.Environment}-${var.DefaultName}-VirtSubnet-1"
-  virtual_network_name = azurerm_virtual_network.XnK-Vn.name
+  virtual_network_name = azurerm_virtual_network.DanH-Vn.name
   address_prefixes     = var.subnet-1
 }
 
 # Create a Network Security Group
-resource "azurerm_network_security_group" "XnK-Sg" {
-  resource_group_name = azurerm_resource_group.XnK-rg.name
+resource "azurerm_network_security_group" "DanH-Sg" {
+  resource_group_name = azurerm_resource_group.DanH-rg.name
   name                = "${var.Environment}-${var.DefaultName}-NetSecGrp"
   location            = var.location
   tags = {
@@ -52,9 +52,9 @@ resource "azurerm_network_security_group" "XnK-Sg" {
 }
 
 # Create a Network Security Rule
-resource "azurerm_network_security_rule" "XnK-Dev-Sr" {
-  network_security_group_name = azurerm_network_security_group.XnK-Sg.name
-  resource_group_name         = azurerm_resource_group.XnK-rg.name
+resource "azurerm_network_security_rule" "DanH-Dev-Sr" {
+  network_security_group_name = azurerm_network_security_group.DanH-Sg.name
+  resource_group_name         = azurerm_resource_group.DanH-rg.name
   name                        = "${var.Environment}-${var.DefaultName}-NetSecRule-Dev"
   priority                    = 100
   direction                   = "Inbound"
@@ -67,15 +67,15 @@ resource "azurerm_network_security_rule" "XnK-Dev-Sr" {
 }
 
 # Create a Subnet Network Security Group Association
-resource "azurerm_subnet_network_security_group_association" "XnK-Dev-Sga" {
-  subnet_id                 = azurerm_subnet.XnK-Sn-1.id
-  network_security_group_id = azurerm_network_security_group.XnK-Sg.id
+resource "azurerm_subnet_network_security_group_association" "DanH-Dev-Sga" {
+  subnet_id                 = azurerm_subnet.DanH-Sn-1.id
+  network_security_group_id = azurerm_network_security_group.DanH-Sg.id
 }
 
 # Add a public IP Address
-resource "azurerm_public_ip" "XnK-PubIP-1" {
+resource "azurerm_public_ip" "DanH-PubIP-1" {
   name                = "${var.Environment}-${var.DefaultName}-PubIP-1"
-  resource_group_name = azurerm_resource_group.XnK-rg.name
+  resource_group_name = azurerm_resource_group.DanH-rg.name
   location            = var.location
   allocation_method   = "Dynamic"
   tags = {
@@ -84,35 +84,35 @@ resource "azurerm_public_ip" "XnK-PubIP-1" {
 }
 
 # Create a Network Interface
-resource "azurerm_network_interface" "XnK-Nic-1" {
+resource "azurerm_network_interface" "DanH-Nic-1" {
   name                = "${var.Environment}-${var.DefaultName}-Nic-1"
-  resource_group_name = azurerm_resource_group.XnK-rg.name
+  resource_group_name = azurerm_resource_group.DanH-rg.name
   location            = var.location
 
   ip_configuration {
     name                          = "${var.Environment}-${var.DefaultName}-Nic-1-Internal"
-    subnet_id                     = azurerm_subnet.XnK-Sn-1.id
+    subnet_id                     = azurerm_subnet.DanH-Sn-1.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.XnK-PubIP-1.id
+    public_ip_address_id          = azurerm_public_ip.DanH-PubIP-1.id
   }
   tags = {
     Environment = var.Environment
   }
 }
 
-resource "azurerm_linux_virtual_machine" "XnK-VML-1" {
+resource "azurerm_linux_virtual_machine" "DanH-VML-1" {
   name                  = "${var.Environment}-${var.DefaultName}-VML-1"
-  resource_group_name   = azurerm_resource_group.XnK-rg.name
+  resource_group_name   = azurerm_resource_group.DanH-rg.name
   location              = var.location
   size                  = var.VM-Size-1
   admin_username        = var.AdminUser
-  network_interface_ids = [azurerm_network_interface.XnK-Nic-1.id]
+  network_interface_ids = [azurerm_network_interface.DanH-Nic-1.id]
 
   custom_data = filebase64("customdata.tpl")
 
   admin_ssh_key {
     username   = var.AdminUser
-    public_key = file("~/.ssh/xnkazurekey.pub")
+    public_key = file("~/.ssh/${var.PublicKeyFN}")
   }
 
   os_disk {
@@ -132,7 +132,7 @@ resource "azurerm_linux_virtual_machine" "XnK-VML-1" {
       host         = "${var.Environment}-${var.DefaultName}-VML-1",
       hostname     = self.public_ip_address,
       user         = var.AdminUser,
-      identityfile = "~/.ssh/xnkazurekey",
+      identityfile = "~/.ssh/DanHazurekey",
     })
     interpreter = var.host_os == "windows" ? ["Powershell", "-Command"] : ["bash", "-c"]
   }
@@ -142,11 +142,11 @@ resource "azurerm_linux_virtual_machine" "XnK-VML-1" {
   }
 }
 
-data "azurerm_public_ip" "XnK-IP-Data" {
-  name                = azurerm_public_ip.XnK-PubIP-1.name
-  resource_group_name = azurerm_resource_group.XnK-rg.name
+data "azurerm_public_ip" "DanH-IP-Data" {
+  name                = azurerm_public_ip.DanH-PubIP-1.name
+  resource_group_name = azurerm_resource_group.DanH-rg.name
 }
 
 output "VM-IP-Address" {
-  value = "${azurerm_linux_virtual_machine.XnK-VML-1.name}: ${azurerm_public_ip.XnK-PubIP-1.ip_address}"
+  value = "${azurerm_linux_virtual_machine.DanH-VML-1.name}: ${azurerm_public_ip.DanH-PubIP-1.ip_address}"
 }

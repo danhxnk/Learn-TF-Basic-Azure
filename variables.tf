@@ -10,7 +10,7 @@ variable "location" {
 
 variable "DefaultName" {
   type    = string
-  default = "XnK"
+  default = "DanH"
 }
 
 variable "Environment" {
@@ -33,9 +33,11 @@ variable "subnet-2" {
 
 variable "AdminUser" {
   type    = string
-  default = "xnkadmin"
 }
 
+variable "PublicKeyFN" {
+  type = string
+}
 variable "VM-Size-1" {
   type    = string
   default = "Standard_B1s"
