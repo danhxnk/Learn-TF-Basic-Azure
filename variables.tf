@@ -33,10 +33,12 @@ variable "subnet-2" {
 
 variable "AdminUser" {
   type    = string
+  sensitive = true
 }
 
 variable "PublicKeyFN" {
   type = string
+  sensitive = true
 }
 variable "VM-Size-1" {
   type    = string
